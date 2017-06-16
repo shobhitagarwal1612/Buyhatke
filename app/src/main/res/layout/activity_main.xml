@@ -13,7 +13,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="89dp"
         android:ems="10"
-        android:text="https://www.myntra.com"
+        android:text="https://www.google.com"
         android:hint="Enter your website"
         android:inputType="textPersonName" />
 

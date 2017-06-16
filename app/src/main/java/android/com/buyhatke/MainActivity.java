@@ -1,6 +1,7 @@
 package android.com.buyhatke;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsCallback;
@@ -31,8 +32,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try {
                     runChromeCustomTab();
-                } catch (Exception e){
+                } catch (Exception e) {
                     Toast.makeText(getBaseContext(), "error", Toast.LENGTH_SHORT).show();
+                    runViaWebView();
                 }
             }
         });
@@ -53,19 +55,16 @@ public class MainActivity extends AppCompatActivity {
         CustomTabsClient.bindCustomTabsService(this, packageName, mConnection);
     }
 
+    private void runViaWebView() {
+        Intent intent = new Intent(this, WebViewActivity.class);
+        intent.putExtra("URL", editText.getText().toString().trim());
+        startActivity(intent);
+    }
+
     private void runChromeCustomTab() {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
         CustomTabsIntent customTabsIntent = builder.build();
-        customTabsIntent.launchUrl(getBaseContext(), Uri.parse(editText.getText().toString()));
-    }
-
-    public void prefetchContent(View view) {
-        String url = "http://www.google.in";
-        if (mClient != null) {
-            mClient.warmup(0);
-            CustomTabsSession customTabsSession = getSession();
-            customTabsSession.mayLaunchUrl(Uri.parse(url), null, null);
-        }
+        customTabsIntent.launchUrl(getBaseContext(), Uri.parse(editText.getText().toString().trim()));
     }
 
     private CustomTabsSession getSession() {

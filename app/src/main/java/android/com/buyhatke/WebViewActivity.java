@@ -1,5 +1,7 @@
 package android.com.buyhatke;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,7 +21,7 @@ import android.widget.Toast;
  * Created by shobhit on 16/6/17.
  */
 
-public class WebViewActivity extends AppCompatActivity {
+public class WebViewActivity extends AppCompatActivity implements FetchDataListener {
 
     private static final String TAG = "WebViewActivity";
     private WebView webView;
@@ -71,8 +73,28 @@ public class WebViewActivity extends AppCompatActivity {
             public void onLoadResource(WebView view, String url) {
                 Log.d(TAG, "onLoadResource: " + url);
 
-                if ((url.contains(".myntra.") || url.contains(".jabong.")) && url.contains("/cart/")) {
-                    startService(new Intent(WebViewActivity.this, FloatingViewService.class));
+                if (url.contains("/cart/")) {
+
+                    if (isServiceRunning(FloatingViewService.class)) {
+                        return;
+                    }
+
+                    if (url.contains(".jabong.")) {
+
+                        startService(new Intent(WebViewActivity.this, FloatingViewService.class));
+
+                        FetchCouponCodeTask getCoupons = new FetchCouponCodeTask();
+                        getCoupons.setArgs(WebViewActivity.this);
+                        getCoupons.execute(1);
+
+                    } else if (url.contains(".myntra.")) {
+
+                        startService(new Intent(WebViewActivity.this, FloatingViewService.class));
+
+                        FetchCouponCodeTask getCoupons = new FetchCouponCodeTask();
+                        getCoupons.setArgs(WebViewActivity.this);
+                        getCoupons.execute(2);
+                    }
                 }
             }
 
@@ -108,5 +130,25 @@ public class WebViewActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void preExecute() {
+        Toast.makeText(getBaseContext(), "Fetching coupons", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void postExecute(String result) {
+        Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

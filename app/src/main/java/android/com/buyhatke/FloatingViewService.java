@@ -1,6 +1,7 @@
 package android.com.buyhatke;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
@@ -14,12 +15,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 
 import static android.com.buyhatke.WebViewActivity.KEY;
 
@@ -29,17 +34,14 @@ import static android.com.buyhatke.WebViewActivity.KEY;
 
 public class FloatingViewService extends Service implements FetchDataListener {
 
-    public static FloatingViewService service;
     private final String TAG = "FloatingViewService";
     private WindowManager mWindowManager;
     private View mFloatingView;
     private TextView couponsView;
     private WebView webView;
-    private String coupon;
     private String[] coupons;
 
     private int index = 0;
-    private int prevIndex = -1;
 
     public FloatingViewService() {
     }
@@ -52,9 +54,6 @@ public class FloatingViewService extends Service implements FetchDataListener {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        service = this;
-
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -161,6 +160,32 @@ public class FloatingViewService extends Service implements FetchDataListener {
         cookieManager.acceptCookie();
         CookieSyncManager.getInstance().startSync();
 
+        final Context myApp = this;
+
+        /* An instance of this class will be registered as a JavaScript interface */
+        class MyJavaScriptInterface {
+            @JavascriptInterface
+            @SuppressWarnings("unused")
+            public void processHTML(String html) {
+                // process the html as needed by the app
+
+                Toast.makeText(getBaseContext(), html, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, html);
+
+                org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
+
+                Element content = doc.getElementsByClass("rupee").get(0);
+                Toast.makeText(getBaseContext(), content.text(), Toast.LENGTH_SHORT).show();
+
+                //webView.loadUrl("http://m.jabong.com/cart/coupon/");
+
+            }
+        }
+
+        /* JavaScript must be enabled if you want it to work, obviously */
+        webView.getSettings().setJavaScriptEnabled(true);
+
+        webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -187,12 +212,9 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
                     if (url.contains(".jabong.")) {
 
-                        if (prevIndex == index) {
-                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
-                        } else {
-                            prevIndex = index;
+                        if (url.contains("m.jabong.com/cart/coupon/")) {
+                            Log.d(TAG, coupon);
                             index++;
-
                             webView.loadUrl("javascript:(function(){" +
                                     "l=document.getElementById('applyCoupon');" +
                                     "l.value='" + coupon + "';" +
@@ -201,9 +223,12 @@ public class FloatingViewService extends Service implements FetchDataListener {
                                     "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
                                     "button.dispatchEvent(e);" +
                                     "})()");
+                        } else {
+
+                            /* This call inject JavaScript into the page which just finished loading. */
+                            webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
+
                         }
-
-
                     } else if (url.contains(".myntra.")) {
 
                         Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();

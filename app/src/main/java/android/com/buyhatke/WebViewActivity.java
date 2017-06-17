@@ -3,7 +3,9 @@ package android.com.buyhatke;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,15 +17,19 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 /**
  * Created by shobhit on 16/6/17.
  */
 
-public class WebViewActivity extends AppCompatActivity implements FetchDataListener {
+public class WebViewActivity extends AppCompatActivity {
+
+    public static final int KEY_JABONG = 1;
+    public static final int KEY_MYNTRA = 2;
+    public static final String KEY = "key_url";
 
     private static final String TAG = "WebViewActivity";
+    SharedPreferences sharedPreferences;
     private WebView webView;
     private ImageButton button;
     private EditText editText;
@@ -32,6 +38,8 @@ public class WebViewActivity extends AppCompatActivity implements FetchDataListe
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.webview_layout);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         String url = getIntent().getExtras().getString("URL");
 
@@ -79,21 +87,20 @@ public class WebViewActivity extends AppCompatActivity implements FetchDataListe
                         return;
                     }
 
+                    int value = 0;
                     if (url.contains(".jabong.")) {
-
-                        startService(new Intent(WebViewActivity.this, FloatingViewService.class));
-
-                        FetchCouponCodeTask getCoupons = new FetchCouponCodeTask();
-                        getCoupons.setArgs(WebViewActivity.this);
-                        getCoupons.execute(1);
-
+                        value = KEY_JABONG;
                     } else if (url.contains(".myntra.")) {
+                        value = KEY_MYNTRA;
+                    }
+
+                    if (value != 0) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putInt(KEY, value);
+                        editor.apply();
 
                         startService(new Intent(WebViewActivity.this, FloatingViewService.class));
 
-                        FetchCouponCodeTask getCoupons = new FetchCouponCodeTask();
-                        getCoupons.setArgs(WebViewActivity.this);
-                        getCoupons.execute(2);
                     }
                 }
             }
@@ -130,16 +137,6 @@ public class WebViewActivity extends AppCompatActivity implements FetchDataListe
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void preExecute() {
-        Toast.makeText(getBaseContext(), "Fetching coupons", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void postExecute(String result) {
-        Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

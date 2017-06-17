@@ -2,20 +2,25 @@ package android.com.buyhatke;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import static android.com.buyhatke.WebViewActivity.KEY;
 
 /**
  * Created by shobhit on 17/6/17.
  */
 
-public class FloatingViewService extends Service {
+public class FloatingViewService extends Service implements FetchDataListener {
 
     private WindowManager mWindowManager;
     private View mFloatingView;
@@ -111,6 +116,15 @@ public class FloatingViewService extends Service {
                 return false;
             }
         });
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int value = sharedPreferences.getInt(KEY, 0);
+
+        if (value != 0) {
+            FetchCouponCodeTask getCoupons = new FetchCouponCodeTask();
+            getCoupons.setArgs(this);
+            getCoupons.execute(value);
+        }
     }
 
     /**
@@ -127,4 +141,15 @@ public class FloatingViewService extends Service {
         super.onDestroy();
         if (mFloatingView != null) mWindowManager.removeView(mFloatingView);
     }
+
+    @Override
+    public void preExecute() {
+        Toast.makeText(getBaseContext(), "Fetching coupons", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void postExecute(String result) {
+        Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+    }
+
 }

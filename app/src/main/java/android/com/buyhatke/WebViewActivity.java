@@ -5,10 +5,14 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * Created by shobhit on 16/6/17.
@@ -41,6 +45,15 @@ public class WebViewActivity extends AppCompatActivity {
             }
         });
 
+        CookieManager cookieManager = CookieManager.getInstance();
+        CookieSyncManager.createInstance(this);
+
+        webView = (WebView) findViewById(R.id.webView);
+        cookieManager.setAcceptCookie(true);
+        cookieManager.acceptCookie();
+        CookieSyncManager.getInstance().startSync();
+
+
         startWebView(url);
     }
 
@@ -61,17 +74,28 @@ public class WebViewActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 Log.d(TAG, "onPageFinished: " + url);
                 editText.setText(url);
+
+                if ((url.contains(".myntra.") || url.contains(".jabong.")) && url.contains("/cart/")) {
+                    Toast.makeText(WebViewActivity.this, "Open", Toast.LENGTH_SHORT).show();
+                }
             }
 
         });
 
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setLoadsImagesAutomatically(true);
-        webView.getSettings().setLoadWithOverviewMode(true);
-        webView.getSettings().setUseWideViewPort(true);
-        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        webView.setScrollbarFadingEnabled(false);
-        webView.getSettings().setBuiltInZoomControls(true);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        settings.setAppCacheEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setDomStorageEnabled(true);
+//        webView.getSettings().setLoadsImagesAutomatically(true);
+//        webView.getSettings().setLoadWithOverviewMode(true);
+//        webView.getSettings().setUseWideViewPort(true);
+//        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+//        webView.setScrollbarFadingEnabled(false);
+//        webView.getSettings().setBuiltInZoomControls(true);
 
         webView.loadUrl(url);
     }

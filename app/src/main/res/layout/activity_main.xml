@@ -13,9 +13,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="89dp"
         android:ems="10"
-        android:text="https://www.google.com"
         android:hint="Enter your website"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:text="https://www.jabong.com" />
 
     <Button
         android:id="@+id/button"

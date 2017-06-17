@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
         String packageName = "com.android.chrome1";
         CustomTabsClient.bindCustomTabsService(this, packageName, mConnection);
+
+        runViaWebView();
     }
 
     private void runViaWebView() {

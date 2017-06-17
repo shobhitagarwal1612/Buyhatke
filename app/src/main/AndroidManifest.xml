@@ -3,6 +3,7 @@
     package="android.com.buyhatke">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,11 @@
         <activity
             android:name=".WebViewActivity"
             android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <service
+            android:name=".FloatingViewService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

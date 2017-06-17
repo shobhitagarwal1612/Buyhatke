@@ -1,5 +1,6 @@
 package android.com.buyhatke;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -69,15 +70,16 @@ public class WebViewActivity extends AppCompatActivity {
 
             public void onLoadResource(WebView view, String url) {
                 Log.d(TAG, "onLoadResource: " + url);
+
+                if ((url.contains(".myntra.") || url.contains(".jabong.")) && url.contains("/cart/")) {
+                    Toast.makeText(WebViewActivity.this, "Open", Toast.LENGTH_SHORT).show();
+                    startService(new Intent(WebViewActivity.this, FloatingViewService.class));
+                }
             }
 
             public void onPageFinished(WebView view, String url) {
                 Log.d(TAG, "onPageFinished: " + url);
                 editText.setText(url);
-
-                if ((url.contains(".myntra.") || url.contains(".jabong.")) && url.contains("/cart/")) {
-                    Toast.makeText(WebViewActivity.this, "Open", Toast.LENGTH_SHORT).show();
-                }
             }
 
         });

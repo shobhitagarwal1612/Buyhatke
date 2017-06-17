@@ -120,13 +120,13 @@ public class WebViewActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setDomStorageEnabled(true);
-//        webView.getSettings().setLoadsImagesAutomatically(true);
-//        webView.getSettings().setLoadWithOverviewMode(true);
-//        webView.getSettings().setUseWideViewPort(true);
-//        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-//        webView.setScrollbarFadingEnabled(false);
-//        webView.getSettings().setBuiltInZoomControls(true);
+        settings.setLoadsImagesAutomatically(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setBuiltInZoomControls(true);
 
+        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
         webView.loadUrl(url);
     }
 

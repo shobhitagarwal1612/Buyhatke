@@ -73,7 +73,7 @@ public class WebViewActivity extends AppCompatActivity implements FetchDataListe
             public void onLoadResource(WebView view, String url) {
                 Log.d(TAG, "onLoadResource: " + url);
 
-                if (url.contains("/cart/")) {
+                if (url.contains("cart")) {
 
                     if (isServiceRunning(FloatingViewService.class)) {
                         return;

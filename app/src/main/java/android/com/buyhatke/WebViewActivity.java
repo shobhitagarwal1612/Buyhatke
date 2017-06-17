@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * Created by shobhit on 16/6/17.
@@ -59,11 +60,9 @@ public class WebViewActivity extends AppCompatActivity {
         CookieManager cookieManager = CookieManager.getInstance();
         CookieSyncManager.createInstance(this);
 
-        webView = (WebView) findViewById(R.id.webView);
         cookieManager.setAcceptCookie(true);
         cookieManager.acceptCookie();
         CookieSyncManager.getInstance().startSync();
-
 
         startWebView(url);
     }
@@ -108,6 +107,30 @@ public class WebViewActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 Log.d(TAG, "onPageFinished: " + url);
                 editText.setText(url);
+
+                if (url.contains("cart")) {
+
+                    if (url.contains(".jabong.")) {
+                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
+
+                        if (url.contains("m.jabong.com/cart/coupon/")) {
+                            Log.d(TAG, "clicking");
+                            webView.loadUrl("javascript:(function(){" +
+                                    "l=document.getElementById('applyCoupon');" +
+                                    "l.value='INDIA10';" +
+                                    "e=document.createEvent('HTMLEvents');" +
+                                    "e.initEvent('click',true,true);" +
+                                    "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
+                                    "button.dispatchEvent(e);" +
+                                    "})()");
+                        } else {
+                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+                        }
+
+                    } else if (url.contains(".myntra.")) {
+                    }
+                }
+
             }
 
         });

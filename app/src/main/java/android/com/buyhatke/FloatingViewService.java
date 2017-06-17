@@ -160,6 +160,20 @@ public class FloatingViewService extends Service implements FetchDataListener {
         StringBuilder builder = new StringBuilder();
         for (String coupon : coupons) {
             builder.append(coupon).append("\n");
+
+            ApplyCouponTask applyCouponTask = new ApplyCouponTask();
+            applyCouponTask.setArgs(new FetchDataListener() {
+                @Override
+                public void preExecute() {
+
+                }
+
+                @Override
+                public void postExecute(String result) {
+
+                }
+            });
+            //applyCouponTask.execute(coupon);
         }
 
         couponsView.setText(builder.toString());

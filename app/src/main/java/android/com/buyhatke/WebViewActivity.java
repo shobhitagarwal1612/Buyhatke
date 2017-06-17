@@ -72,7 +72,6 @@ public class WebViewActivity extends AppCompatActivity {
                 Log.d(TAG, "onLoadResource: " + url);
 
                 if ((url.contains(".myntra.") || url.contains(".jabong.")) && url.contains("/cart/")) {
-                    Toast.makeText(WebViewActivity.this, "Open", Toast.LENGTH_SHORT).show();
                     startService(new Intent(WebViewActivity.this, FloatingViewService.class));
                 }
             }

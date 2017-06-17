@@ -114,20 +114,33 @@ public class WebViewActivity extends AppCompatActivity {
                         Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
 
                         if (url.contains("m.jabong.com/cart/coupon/")) {
-                            Log.d(TAG, "clicking");
-                            webView.loadUrl("javascript:(function(){" +
+                            Log.d(TAG, "clicking jabong");
+                         /*   FloatingViewService.service.getWebView().loadUrl("javascript:(function(){" +
                                     "l=document.getElementById('applyCoupon');" +
                                     "l.value='INDIA10';" +
                                     "e=document.createEvent('HTMLEvents');" +
                                     "e.initEvent('click',true,true);" +
                                     "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
                                     "button.dispatchEvent(e);" +
-                                    "})()");
+                                    "})()");*/
                         } else {
-                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+//                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+//                            FloatingViewService.service.getWebView().loadUrl("http://m.jabong.com/cart/coupon/");
                         }
 
                     } else if (url.contains(".myntra.")) {
+
+                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
+
+                        Log.d(TAG, "clicking myntra");
+                        webView.loadUrl("javascript:(function(){" +
+                                "l=document.getElementsByName('coupon_code')[0];" +
+                                "l.value='INDIA10';" +
+                                "e=document.createEvent('HTMLEvents');" +
+                                "e.initEvent('click',true,true);" +
+                                "button=document.getElementsByClassName('btn-apply')[0];" +
+                                "button.dispatchEvent(e);" +
+                                "})()");
                     }
                 }
 

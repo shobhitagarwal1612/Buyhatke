@@ -6,11 +6,17 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,9 +29,17 @@ import static android.com.buyhatke.WebViewActivity.KEY;
 
 public class FloatingViewService extends Service implements FetchDataListener {
 
+    public static FloatingViewService service;
+    private final String TAG = "FloatingViewService";
     private WindowManager mWindowManager;
     private View mFloatingView;
     private TextView couponsView;
+    private WebView webView;
+    private String coupon;
+    private String[] coupons;
+
+    private int index = 0;
+    private int prevIndex = -1;
 
     public FloatingViewService() {
     }
@@ -38,6 +52,9 @@ public class FloatingViewService extends Service implements FetchDataListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        service = this;
+
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -57,6 +74,10 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
         final View collapsedView = mFloatingView.findViewById(R.id.collapse_view);
         final View expandedView = mFloatingView.findViewById(R.id.expanded_container);
+
+        webView = (WebView) mFloatingView.findViewById(R.id.webView);
+
+        initWebView();
 
         couponsView = (TextView) mFloatingView.findViewById(R.id.coupons);
 
@@ -131,6 +152,95 @@ public class FloatingViewService extends Service implements FetchDataListener {
         }
     }
 
+    private void initWebView() {
+
+        CookieManager cookieManager = CookieManager.getInstance();
+        CookieSyncManager.createInstance(this);
+
+        cookieManager.setAcceptCookie(true);
+        cookieManager.acceptCookie();
+        CookieSyncManager.getInstance().startSync();
+
+
+        webView.setWebViewClient(new WebViewClient() {
+
+            //If you will not use this method url links are open in new browser not in webview
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+
+            public void onLoadResource(WebView view, String url) {
+                Log.d(TAG, "onLoadResource: " + url);
+            }
+
+            public void onPageFinished(WebView view, String url) {
+                Log.d(TAG, "onPageFinished: " + url);
+
+                if (index >= coupons.length) {
+                    return;
+                }
+
+                String coupon = coupons[index];
+
+                if (url.contains("cart")) {
+
+                    if (url.contains(".jabong.")) {
+
+                        if (prevIndex == index) {
+                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+                        } else {
+                            prevIndex = index;
+                            index++;
+
+                            webView.loadUrl("javascript:(function(){" +
+                                    "l=document.getElementById('applyCoupon');" +
+                                    "l.value='" + coupon + "';" +
+                                    "e=document.createEvent('HTMLEvents');" +
+                                    "e.initEvent('click',true,true);" +
+                                    "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
+                                    "button.dispatchEvent(e);" +
+                                    "})()");
+                        }
+
+
+                    } else if (url.contains(".myntra.")) {
+
+                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
+
+                        Log.d(TAG, "clicking myntra");
+                        webView.loadUrl("javascript:(function(){" +
+                                "l=document.getElementsByName('coupon_code')[0];" +
+                                "l.value='INDIA10';" +
+                                "e=document.createEvent('HTMLEvents');" +
+                                "e.initEvent('click',true,true);" +
+                                "button=document.getElementsByClassName('btn-apply')[0];" +
+                                "button.dispatchEvent(e);" +
+                                "})()");
+                    }
+                }
+
+            }
+
+        });
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        settings.setAppCacheEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadsImagesAutomatically(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setBuiltInZoomControls(true);
+
+        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
+    }
+
     /**
      * Detect if the floating view is collapsed or expanded.
      *
@@ -155,12 +265,11 @@ public class FloatingViewService extends Service implements FetchDataListener {
     public void postExecute(String result) {
         Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
 
-        String[] coupons = result.split("~");
+        coupons = result.split("~");
 
         StringBuilder builder = new StringBuilder();
         for (String coupon : coupons) {
             builder.append(coupon).append("\n");
-
             ApplyCouponTask applyCouponTask = new ApplyCouponTask();
             applyCouponTask.setArgs(new FetchDataListener() {
                 @Override
@@ -177,6 +286,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
         }
 
         couponsView.setText(builder.toString());
-    }
 
+        webView.loadUrl("http://m.jabong.com/cart/coupon/");
+    }
 }

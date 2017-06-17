@@ -145,7 +145,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
         }
     }
 
-    private void initWebView(final WebView webView) {
+    private void initWebView(final WebView webView, final TextView priceView) {
 
         CookieManager cookieManager = CookieManager.getInstance();
         CookieSyncManager.createInstance(this);
@@ -167,7 +167,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
                 org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
 
                 Element content = doc.getElementsByClass("rupee").get(0);
-                Toast.makeText(getBaseContext(), coupons[index] + " : " + content.text(), Toast.LENGTH_SHORT).show();
+                priceView.setText(content.text());
             }
         }
 
@@ -179,10 +179,6 @@ public class FloatingViewService extends Service implements FetchDataListener {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 return true;
-            }
-
-            public void onLoadResource(WebView view, String url) {
-                Log.d(TAG, "onLoadResource: " + url);
             }
 
             public void onPageFinished(WebView view, String url) {
@@ -285,17 +281,19 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
             View view = View.inflate(getBaseContext(), R.layout.item_layout, null);
 
-            TextView textView = (TextView) view.findViewById(R.id.coupon);
-            textView.setText(coupon);
+            TextView couponView = (TextView) view.findViewById(R.id.coupon);
+            TextView priceView = (TextView) view.findViewById(R.id.price);
+            WebView webView = (WebView) view.findViewById(R.id.itemWebView);
 
-            final WebView webView = (WebView) view.findViewById(R.id.itemWebView);
+            couponView.setText(coupon);
 
-            initWebView(webView);
+            initWebView(webView, priceView);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
             expandedView.addView(view, params);
+
             webView.loadUrl("http://m.jabong.com/cart/coupon/");
+
         }
     }
 }

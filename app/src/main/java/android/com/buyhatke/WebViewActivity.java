@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -103,12 +102,6 @@ public class WebViewActivity extends AppCompatActivity {
 
                     }
                 }
-            }
-
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                Log.d("intercept", url);
-                return super.shouldInterceptRequest(view, url);
             }
 
             public void onPageFinished(WebView view, String url) {

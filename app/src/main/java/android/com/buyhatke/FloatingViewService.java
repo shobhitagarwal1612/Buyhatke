@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import static android.com.buyhatke.WebViewActivity.KEY;
@@ -24,6 +25,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
     private WindowManager mWindowManager;
     private View mFloatingView;
+    private TextView couponsView;
 
     public FloatingViewService() {
     }
@@ -55,6 +57,8 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
         final View collapsedView = mFloatingView.findViewById(R.id.collapse_view);
         final View expandedView = mFloatingView.findViewById(R.id.expanded_container);
+
+        couponsView = (TextView) mFloatingView.findViewById(R.id.coupons);
 
         ImageView closeButtonCollapsed = (ImageView) mFloatingView.findViewById(R.id.close_btn);
         closeButtonCollapsed.setOnClickListener(new View.OnClickListener() {
@@ -150,6 +154,15 @@ public class FloatingViewService extends Service implements FetchDataListener {
     @Override
     public void postExecute(String result) {
         Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+
+        String[] coupons = result.split("~");
+
+        StringBuilder builder = new StringBuilder();
+        for (String coupon : coupons) {
+            builder.append(coupon).append("\n");
+        }
+
+        couponsView.setText(builder.toString());
     }
 
 }

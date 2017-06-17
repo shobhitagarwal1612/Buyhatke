@@ -49,6 +49,7 @@
             android:visibility="gone">
 
             <TextView
+                android:id="@+id/coupons"
                 android:layout_width="100dp"
                 android:text="Sample text"
                 android:layout_height="300dp" />

@@ -222,16 +222,38 @@ public class FloatingViewService extends Service implements FetchDataListener {
             public void postExecute(String result) {
                 Toast.makeText(getBaseContext(), "Finished!", Toast.LENGTH_SHORT).show();
 
-                String finalDiscountedValue = getBestDiscount();
+                String disount = getBestDiscount();
+                String title;
+                String message;
 
-                if (finalDiscountedValue != null) {
-                    Toast.makeText(getBaseContext(), finalDiscountedValue, Toast.LENGTH_SHORT).show();
+                if (disount != null) {
+                    title = "Congratulations!!!";
+                    message = "Discount " + disount + " applied successfully";
+
                 } else {
-                    Toast.makeText(getBaseContext(), "No coupons applied", Toast.LENGTH_SHORT).show();
+                    title = "Sorry";
+                    message = "No coupons applicable";
                 }
 
+                Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
+
+                //createDialog(title, message);
             }
         });
         applyCouponTask.execute();
+    }
+
+    private void createDialog(String title, String message) {
+
+        final View view = LayoutInflater.from(this).inflate(R.layout.dialog, null);
+
+        ((TextView) view.findViewById(R.id.title)).setText(title);
+        ((TextView) view.findViewById(R.id.message)).setText(message);
+        view.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                view.setVisibility(View.GONE);
+            }
+        });
     }
 }

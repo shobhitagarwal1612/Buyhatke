@@ -1,6 +1,7 @@
 package android.com.buyhatke.tasks;
 
 import android.com.buyhatke.ApplyCoupon;
+import android.com.buyhatke.interfaces.FetchDataListener;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
@@ -12,15 +13,18 @@ import java.util.ArrayList;
 public class ApplyCouponTask extends AsyncTask {
 
     private ArrayList<ApplyCoupon> tasksList;
+    private FetchDataListener listener;
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        listener.preExecute();
     }
 
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
+        listener.postExecute("");
     }
 
     @Override
@@ -36,7 +40,7 @@ public class ApplyCouponTask extends AsyncTask {
             publishProgress(task);
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -47,5 +51,9 @@ public class ApplyCouponTask extends AsyncTask {
 
     public void setArgs(ArrayList<ApplyCoupon> tasks) {
         tasksList = tasks;
+    }
+
+    public void setListener(FetchDataListener fetchDataListener) {
+        listener = fetchDataListener;
     }
 }

@@ -11,7 +11,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -82,7 +81,9 @@ public class ApplyCoupon implements UpdatePrice {
                     if (url.contains(".jabong.")) {
 
                         if (url.contains("m.jabong.com/cart/coupon/")) {
-                            Log.d(TAG, coupon);
+
+                            Log.d(TAG, coupon + " : loading");
+
                             webView.loadUrl("javascript:(function(){" +
                                     "l=document.getElementById('applyCoupon');" +
                                     "l.value='" + coupon + "';" +
@@ -92,13 +93,14 @@ public class ApplyCoupon implements UpdatePrice {
                                     "button.dispatchEvent(e);" +
                                     "})()");
                         } else {
+
                             /* This call inject JavaScript into the page which just finished loading. */
                             Log.d(TAG, coupon + " : loaded");
+
                             webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
+
                         }
                     } else if (url.contains(".myntra.")) {
-
-                        Toast.makeText(context, "Clicking", Toast.LENGTH_SHORT).show();
 
                         Log.d(TAG, "clicking myntra");
                         webView.loadUrl("javascript:(function(){" +

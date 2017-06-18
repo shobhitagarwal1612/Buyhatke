@@ -145,20 +145,28 @@ public class FloatingViewService extends Service implements FetchDataListener {
     }
 
     private String getBestDiscount() {
-        int price = 0;
+        float price = 0;
         int index = -1;
         for (TextView priceTextView : discountedPrices) {
             if (!priceTextView.getText().equals("")) {
-                int discountedPrice = Integer.parseInt(priceTextView.getText().toString().trim());
+                try {
+                    float discountedPrice = Float.parseFloat(priceTextView.getText().toString().trim());
 
-                if (discountedPrice < price || index == -1) {
-                    price = discountedPrice;
-                    index = discountedPrices.indexOf(priceTextView);
+                    if (discountedPrice < price || index == -1) {
+                        price = discountedPrice;
+                        index = discountedPrices.indexOf(priceTextView);
+                    }
+                } catch (NumberFormatException e) {
+                    //not a integer value, so ignore
                 }
             }
         }
 
-        return coupons[index];
+        if (index != -1) {
+            return coupons[index];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -203,6 +211,27 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
         ApplyCouponTask applyCouponTask = new ApplyCouponTask();
         applyCouponTask.setArgs(tasks);
+        applyCouponTask.setListener(new FetchDataListener() {
+
+            @Override
+            public void preExecute() {
+                Toast.makeText(getBaseContext(), "Starting search...", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void postExecute(String result) {
+                Toast.makeText(getBaseContext(), "Finished!", Toast.LENGTH_SHORT).show();
+
+                String finalDiscountedValue = getBestDiscount();
+
+                if (finalDiscountedValue != null) {
+                    Toast.makeText(getBaseContext(), finalDiscountedValue, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "No coupons applied", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
         applyCouponTask.execute();
     }
 }

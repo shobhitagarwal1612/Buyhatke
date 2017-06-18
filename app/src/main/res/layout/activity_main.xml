@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="android.com.buyhatke.MainActivity">
+    tools:context="android.com.buyhatke.activities.MainActivity">
 
     <EditText
         android:id="@+id/editText"

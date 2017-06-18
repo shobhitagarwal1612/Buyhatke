@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,11 +21,11 @@
         </activity>
 
         <activity
-            android:name=".WebViewActivity"
+            android:name=".activities.WebViewActivity"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
         <service
-            android:name=".FloatingViewService"
+            android:name=".service.FloatingViewService"
             android:enabled="true"
             android:exported="false" />
     </application>

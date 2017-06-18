@@ -1,6 +1,8 @@
-package android.com.buyhatke;
+package android.com.buyhatke.activities;
 
 import android.app.ActivityManager;
+import android.com.buyhatke.R;
+import android.com.buyhatke.service.FloatingViewService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;

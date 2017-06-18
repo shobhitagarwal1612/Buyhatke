@@ -1,6 +1,11 @@
-package android.com.buyhatke;
+package android.com.buyhatke.service;
 
 import android.app.Service;
+import android.com.buyhatke.ApplyCoupon;
+import android.com.buyhatke.R;
+import android.com.buyhatke.interfaces.FetchDataListener;
+import android.com.buyhatke.tasks.ApplyCouponTask;
+import android.com.buyhatke.tasks.FetchCouponCodeTask;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
@@ -19,7 +24,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static android.com.buyhatke.WebViewActivity.KEY;
+import static android.com.buyhatke.activities.WebViewActivity.KEY;
 
 /**
  * Created by shobhit on 17/6/17.

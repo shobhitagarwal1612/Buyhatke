@@ -1,5 +1,6 @@
 package android.com.buyhatke;
 
+import android.com.buyhatke.interfaces.UpdatePrice;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
@@ -131,14 +132,9 @@ public class ApplyCoupon implements UpdatePrice {
                                 "})()");
                     }
                 }
-
             }
-
         });
-
         configWebView(webView);
-
-
     }
 
     private void configWebView(WebView webView) {

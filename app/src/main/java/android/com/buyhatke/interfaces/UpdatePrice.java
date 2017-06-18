@@ -1,4 +1,4 @@
-package android.com.buyhatke;
+package android.com.buyhatke.interfaces;
 
 /**
  * Created by shobhit on 18/6/17.

@@ -1,5 +1,6 @@
-package android.com.buyhatke;
+package android.com.buyhatke.tasks;
 
+import android.com.buyhatke.interfaces.FetchDataListener;
 import android.os.AsyncTask;
 import android.util.Log;
 

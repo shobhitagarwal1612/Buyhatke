@@ -1,5 +1,6 @@
-package android.com.buyhatke;
+package android.com.buyhatke.activities;
 
+import android.com.buyhatke.R;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;

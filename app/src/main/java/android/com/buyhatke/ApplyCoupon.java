@@ -66,27 +66,6 @@ public class ApplyCoupon implements UpdatePrice {
         cookieManager.acceptCookie();
         CookieSyncManager.getInstance().startSync();
 
-
-            /* An instance of this class will be registered as a JavaScript interface */
-        class MyJavaScriptInterface {
-            @JavascriptInterface
-            @SuppressWarnings("unused")
-            public void processHTML(String html) {
-                // process the html as needed by the app
-
-                Element content;
-                String value = "";
-                try {
-                    org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
-                    content = doc.getElementsByClass("rupee").get(0);
-                    value = content.text();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                listener.update(value);
-            }
-        }
-
         webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
 
         webView.setWebViewClient(new WebViewClient() {
@@ -156,5 +135,26 @@ public class ApplyCoupon implements UpdatePrice {
 
     public void runTask() {
         webView.loadUrl("http://m.jabong.com/cart/coupon/");
+    }
+
+
+    /* An instance of this class will be registered as a JavaScript interface */
+    private class MyJavaScriptInterface {
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void processHTML(String html) {
+            // process the html as needed by the app
+
+            Element content;
+            String value = "";
+            try {
+                org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
+                content = doc.getElementsByClass("rupee").get(0);
+                value = content.text();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            listener.update(value);
+        }
     }
 }

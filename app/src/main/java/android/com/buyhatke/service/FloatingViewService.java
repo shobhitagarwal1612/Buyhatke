@@ -9,6 +9,7 @@ import android.com.buyhatke.tasks.FetchCouponCodeTask;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -230,29 +231,53 @@ public class FloatingViewService extends Service implements FetchDataListener {
             }
 
             @Override
-            public void postExecute(String result) {
+            public void postExecute(final String result) {
                 Toast.makeText(getBaseContext(), "Finished!", Toast.LENGTH_SHORT).show();
 
-                String disount = getBestDiscount();
-                String title;
-                String message;
+                final Handler seekHandler = new Handler();
 
-                if (disount != null) {
-                    title = "Congratulations!!!";
-                    message = "Discount " + disount + " applied successfully";
+                /*
+                 * Background Runnable thread
+                 */
+                Runnable updateTimeTask = new Runnable() {
+                    public void run() {
+                        if (getDiscounts() < tasks.size()) {
+                            seekHandler.postDelayed(this, 500);
+                        } else {
+                            String discount = getBestDiscount();
+                            String title;
+                            String message;
 
-                } else {
-                    title = "Sorry";
-                    message = "No coupons applicable";
-                }
+                            if (discount != null) {
+                                title = "Congratulations!!!";
+                                message = "Discount " + discount + " applied successfully";
 
-                Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
+                            } else {
+                                title = "Sorry";
+                                message = "No coupons applicable";
+                            }
 
-                sendResult(disount);
-                //createDialog(title, message);
+                            Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
+
+                            sendResult(discount);
+                        }
+                    }
+                };
+
+                seekHandler.postDelayed(updateTimeTask, 500);
             }
         });
         applyCouponTask.execute();
+    }
+
+    private int getDiscounts() {
+        int count = 0;
+        for (TextView textView : discountedPrices) {
+            if (!textView.getText().toString().equals("")) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void createDialog(String title, String message) {

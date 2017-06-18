@@ -22,7 +22,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import static android.com.buyhatke.service.FloatingViewService.SERVICE_MESSAGE;
 import static android.com.buyhatke.service.FloatingViewService.SERVICE_RESULT;
@@ -44,6 +43,7 @@ public class WebViewActivity extends AppCompatActivity {
     private BroadcastReceiver receiver;
     private String coupon;
     private boolean loading = false;
+    private boolean couponApplied = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +80,6 @@ public class WebViewActivity extends AppCompatActivity {
                 if (intent.hasExtra(SERVICE_MESSAGE)) {
                     coupon = intent.getStringExtra(SERVICE_MESSAGE);
 
-                    loading = true;
                     webView.loadUrl("javascript:(function(){" +
                             "l=document.getElementById('applyCoupon');" +
                             "l.value='" + coupon + "';" +
@@ -137,36 +136,22 @@ public class WebViewActivity extends AppCompatActivity {
                 Log.d(TAG, "onPageFinished: " + url);
                 editText.setText(url);
 
-                if (url.contains("cart")) {
+                if (url.contains("cart") && loading) {
 
                     if (url.contains(".jabong.")) {
-                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "jabong cart");
 
-                        if (url.contains("m.jabong.com/cart/coupon/")) {
-                            Log.d(TAG, "clicking jabong");
-
-                            if (loading) {
+                        if (!couponApplied) {
+                            if (url.contains("m.jabong.com/cart/coupon/")) {
                                 webView.loadUrl("http://m.jabong.com/cart/");
-                                loading = false;
+                                couponApplied = true;
+                            } else {
+                                webView.loadUrl("http://m.jabong.com/cart/coupon/");
                             }
-                         /*   FloatingViewService.service.getWebView().loadUrl("javascript:(function(){" +
-                                    "l=document.getElementById('applyCoupon');" +
-                                    "l.value='INDIA10';" +
-                                    "e=document.createEvent('HTMLEvents');" +
-                                    "e.initEvent('click',true,true);" +
-                                    "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
-                                    "button.dispatchEvent(e);" +
-                                    "})()");*/
-                        } else {
-                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
-//                            FloatingViewService.service.getWebView().loadUrl("http://m.jabong.com/cart/coupon/");
                         }
-
                     } else if (url.contains(".myntra.")) {
+                        Log.d(TAG, "myntra cart");
 
-                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
-
-                        Log.d(TAG, "clicking myntra");
                         webView.loadUrl("javascript:(function(){" +
                                 "l=document.getElementsByName('coupon_code')[0];" +
                                 "l.value='INDIA10';" +

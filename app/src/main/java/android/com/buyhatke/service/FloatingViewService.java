@@ -244,22 +244,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
                         if (getDiscounts() < tasks.size()) {
                             seekHandler.postDelayed(this, 500);
                         } else {
-                            String discount = getBestDiscount();
-                            String title;
-                            String message;
-
-                            if (discount != null) {
-                                title = "Congratulations!!!";
-                                message = "Discount " + discount + " applied successfully";
-
-                            } else {
-                                title = "Sorry";
-                                message = "No coupons applicable";
-                            }
-
-                            Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
-
-                            sendResult(discount);
+                            finishTask();
                         }
                     }
                 };
@@ -270,6 +255,26 @@ public class FloatingViewService extends Service implements FetchDataListener {
         applyCouponTask.execute();
     }
 
+    private void finishTask() {
+        String discount = getBestDiscount();
+        String title;
+        String message;
+
+        if (discount != null) {
+            title = "Congratulations!!!";
+            message = "Discount " + discount + " applied successfully";
+
+        } else {
+            title = "Sorry";
+            message = "No coupons applicable";
+        }
+
+        Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
+
+        sendResult(discount);
+        this.onDestroy();
+    }
+
     private int getDiscounts() {
         int count = 0;
         for (TextView textView : discountedPrices) {
@@ -278,19 +283,5 @@ public class FloatingViewService extends Service implements FetchDataListener {
             }
         }
         return count;
-    }
-
-    private void createDialog(String title, String message) {
-
-        final View view = LayoutInflater.from(this).inflate(R.layout.dialog, null);
-
-        ((TextView) view.findViewById(R.id.title)).setText(title);
-        ((TextView) view.findViewById(R.id.message)).setText(message);
-        view.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                view.setVisibility(View.GONE);
-            }
-        });
     }
 }

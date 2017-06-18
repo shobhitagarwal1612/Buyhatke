@@ -6,14 +6,12 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,10 +32,10 @@ public class FloatingViewService extends Service implements FetchDataListener {
     private View mFloatingView;
 
     private LinearLayout expandedView;
-    private ArrayList<WebView> webViews = new ArrayList<>();
-    private ArrayList<TextView> discountedPrices = new ArrayList<>();
     private String[] coupons;
+
     private ArrayList<ApplyCoupon> tasks = new ArrayList<>();
+    private ArrayList<TextView> discountedPrices = new ArrayList<>();
 
     public FloatingViewService() {
     }
@@ -158,119 +156,6 @@ public class FloatingViewService extends Service implements FetchDataListener {
         return coupons[index];
     }
 
-/*
-    private void initWebView(final String coupon, final WebView webView, final UpdatePrice listener) {
-
-        CookieManager cookieManager = CookieManager.getInstance();
-        CookieSyncManager.createInstance(this);
-
-        cookieManager.setAcceptCookie(true);
-        cookieManager.acceptCookie();
-        CookieSyncManager.getInstance().startSync();
-
-
-            */
-/* An instance of this class will be registered as a JavaScript interface *//*
-
-        class MyJavaScriptInterface {
-            @JavascriptInterface
-            @SuppressWarnings("unused")
-            public void processHTML(String html) {
-                // process the html as needed by the app
-
-                Element content;
-                String value = "";
-                try {
-                    org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
-                    content = doc.getElementsByClass("rupee").get(0);
-                    value = content.text();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                listener.update(value);
-            }
-        }
-
-        webView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
-
-        webView.setWebViewClient(new WebViewClient() {
-
-            //If you will not use this method url links are open in new browser not in webview
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
-            }
-
-            @Override
-            public void onLoadResource(WebView view, String url) {
-                Log.d(TAG, "onLoadResource: " + url + " : " + coupon);
-                super.onLoadResource(view, url);
-            }
-
-            public void onPageFinished(WebView view, String url) {
-                Log.d(TAG, "onPageFinished: " + url + " : " + coupon);
-
-                if (url.contains("cart")) {
-
-                    if (url.contains(".jabong.")) {
-
-                        if (url.contains("m.jabong.com/cart/coupon/")) {
-                            Log.d(TAG, coupon);
-                            webView.loadUrl("javascript:(function(){" +
-                                    "l=document.getElementById('applyCoupon');" +
-                                    "l.value='" + coupon + "';" +
-                                    "e=document.createEvent('HTMLEvents');" +
-                                    "e.initEvent('click',true,true);" +
-                                    "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
-                                    "button.dispatchEvent(e);" +
-                                    "})()");
-                        } else {
-                            */
-/* This call inject JavaScript into the page which just finished loading. *//*
-
-                            webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
-                        }
-                    } else if (url.contains(".myntra.")) {
-
-                        Toast.makeText(getBaseContext(), "Clicking", Toast.LENGTH_SHORT).show();
-
-                        Log.d(TAG, "clicking myntra");
-                        webView.loadUrl("javascript:(function(){" +
-                                "l=document.getElementsByName('coupon_code')[0];" +
-                                "l.value='INDIA10';" +
-                                "e=document.createEvent('HTMLEvents');" +
-                                "e.initEvent('click',true,true);" +
-                                "button=document.getElementsByClassName('btn-apply')[0];" +
-                                "button.dispatchEvent(e);" +
-                                "})()");
-                    }
-                }
-
-            }
-
-        });
-
-        configWebView(webView);
-    }
-
-    private void configWebView(WebView webView) {
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        settings.setAppCacheEnabled(true);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(true);
-        settings.setDomStorageEnabled(true);
-        settings.setLoadsImagesAutomatically(true);
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
-        settings.setBuiltInZoomControls(true);
-        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        webView.setScrollbarFadingEnabled(false);
-    }
-*/
-
     /**
      * Detect if the floating view is collapsed or expanded.
      *
@@ -298,58 +183,21 @@ public class FloatingViewService extends Service implements FetchDataListener {
         coupons = result.split("~");
 
         for (String coupon : coupons) {
-
             ApplyCoupon applyCoupon = new ApplyCoupon(getBaseContext(), coupon);
 
             View view = applyCoupon.initLayout();
-
-//            priceView.setText("");
-            discountedPrices.add(applyCoupon.getPriceView());
-
-            /*UpdatePrice updatePriceListener = new UpdatePrice() {
-                @Override
-                public void update(String price) {
-                    priceView.setText(price);
-                }
-            };*/
-
             applyCoupon.initWebView();
+
+            discountedPrices.add(applyCoupon.getPriceView());
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             expandedView.addView(view, params);
 
             tasks.add(applyCoupon);
-
-            applyCoupon.runTask();
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void runTasks() {
-        Log.d(TAG, "checking if any coupon is left to be applied");
-        for (int i = 0; i < discountedPrices.size(); i++) {
-            TextView discountedPrice = discountedPrices.get(i);
-            if (discountedPrice.getText().toString().trim().equals("")) {
-                webViews.get(i).loadUrl("javascript:(function(){" +
-                        "l=document.getElementById('applyCoupon');" +
-                        "l.value='" + coupons[i] + "';" +
-                        "e=document.createEvent('HTMLEvents');" +
-                        "e.initEvent('click',true,true);" +
-                        "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
-                        "button.dispatchEvent(e);" +
-                        "})()");
-            }
         }
 
-//        String discount = getBestDiscount();
-//        Toast.makeText(getBaseContext(), discount, Toast.LENGTH_SHORT).show();
-    }
-
-    public void refresh(WebView webView) {
-        webView.loadUrl("http://m.jabong.com/cart/coupon/");
+        ApplyCouponTask applyCouponTask = new ApplyCouponTask();
+        applyCouponTask.setArgs(tasks);
+        applyCouponTask.execute();
     }
 }

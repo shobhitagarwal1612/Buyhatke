@@ -96,15 +96,7 @@ public class ApplyCoupon implements UpdatePrice {
                 return true;
             }
 
-//            @Override
-//            public void onLoadResource(WebView view, String url) {
-//                Log.d(TAG, "onLoadResource: " + url + " : " + coupon);
-//                super.onLoadResource(view, url);
-//            }
-
             public void onPageFinished(WebView view, String url) {
-                Log.d(TAG, "onPageFinished: " + url + " : " + coupon);
-
                 if (url.contains("cart")) {
 
                     if (url.contains(".jabong.")) {
@@ -121,6 +113,7 @@ public class ApplyCoupon implements UpdatePrice {
                                     "})()");
                         } else {
                             /* This call inject JavaScript into the page which just finished loading. */
+                            Log.d(TAG, coupon + " : loaded");
                             webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
                         }
                     } else if (url.contains(".myntra.")) {
@@ -144,6 +137,8 @@ public class ApplyCoupon implements UpdatePrice {
         });
 
         configWebView(webView);
+
+
     }
 
     private void configWebView(WebView webView) {

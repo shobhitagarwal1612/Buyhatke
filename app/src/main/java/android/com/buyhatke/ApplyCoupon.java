@@ -96,11 +96,11 @@ public class ApplyCoupon implements UpdatePrice {
                 return true;
             }
 
-            @Override
-            public void onLoadResource(WebView view, String url) {
-                Log.d(TAG, "onLoadResource: " + url + " : " + coupon);
-                super.onLoadResource(view, url);
-            }
+//            @Override
+//            public void onLoadResource(WebView view, String url) {
+//                Log.d(TAG, "onLoadResource: " + url + " : " + coupon);
+//                super.onLoadResource(view, url);
+//            }
 
             public void onPageFinished(WebView view, String url) {
                 Log.d(TAG, "onPageFinished: " + url + " : " + coupon);

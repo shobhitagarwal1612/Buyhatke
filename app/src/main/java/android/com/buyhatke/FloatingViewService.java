@@ -37,6 +37,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
     private ArrayList<WebView> webViews = new ArrayList<>();
     private ArrayList<TextView> discountedPrices = new ArrayList<>();
     private String[] coupons;
+    private ArrayList<ApplyCoupon> tasks = new ArrayList<>();
 
     public FloatingViewService() {
     }
@@ -317,12 +318,15 @@ public class FloatingViewService extends Service implements FetchDataListener {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             expandedView.addView(view, params);
 
-            applyCoupon.runTask();
-//            webViews.add(webView);
-//            refresh(webView);
-        }
+            tasks.add(applyCoupon);
 
-//        runTasks();
+            applyCoupon.runTask();
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void runTasks() {

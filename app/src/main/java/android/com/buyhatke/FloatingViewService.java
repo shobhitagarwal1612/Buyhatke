@@ -42,8 +42,9 @@ public class FloatingViewService extends Service implements FetchDataListener {
     private View mFloatingView;
 
     private LinearLayout expandedView;
-    private boolean firstTime = true;
-    private ArrayList<WebView> tasks;
+    private ArrayList<WebView> webViews = new ArrayList<>();
+    private ArrayList<TextView> discountedPrices = new ArrayList<>();
+    private String[] coupons;
 
     public FloatingViewService() {
     }
@@ -147,6 +148,23 @@ public class FloatingViewService extends Service implements FetchDataListener {
         }
     }
 
+    private String getBestDiscount() {
+        int price = 0;
+        int index = -1;
+        for (TextView priceTextView : discountedPrices) {
+            if (!priceTextView.getText().equals("")) {
+                int discountedPrice = Integer.parseInt(priceTextView.getText().toString().trim());
+
+                if (discountedPrice < price || index == -1) {
+                    price = discountedPrice;
+                    index = discountedPrices.indexOf(priceTextView);
+                }
+            }
+        }
+
+        return coupons[index];
+    }
+
     private void initWebView(final String coupon, final WebView webView, final UpdatePrice listener) {
 
         CookieManager cookieManager = CookieManager.getInstance();
@@ -164,12 +182,16 @@ public class FloatingViewService extends Service implements FetchDataListener {
             public void processHTML(String html) {
                 // process the html as needed by the app
 
-                Log.d(TAG, html);
-
-                org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
-
-                Element content = doc.getElementsByClass("rupee").get(0);
-                listener.update(content.text());
+                Element content;
+                String value = "";
+                try {
+                    org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
+                    content = doc.getElementsByClass("rupee").get(0);
+                    value = content.text();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                listener.update(value);
             }
         }
 
@@ -274,9 +296,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
     public void postExecute(String result) {
         Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
 
-        String[] coupons = result.split("~");
-
-        tasks = new ArrayList<>();
+        coupons = result.split("~");
 
         for (String coupon : coupons) {
 
@@ -286,8 +306,10 @@ public class FloatingViewService extends Service implements FetchDataListener {
             final TextView priceView = (TextView) view.findViewById(R.id.price);
             final WebView webView = (WebView) view.findViewById(R.id.itemWebView);
 
-            priceView.setText("0");
+//            priceView.setText("");
             couponView.setText(coupon);
+
+            discountedPrices.add(priceView);
 
             UpdatePrice updatePriceListener = new UpdatePrice() {
                 @Override
@@ -301,16 +323,20 @@ public class FloatingViewService extends Service implements FetchDataListener {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             expandedView.addView(view, params);
 
-            tasks.add(webView);
+            refresh(webView);
+            //webViews.add(webView);
         }
 
-        runTasks();
+        //runTasks();
     }
 
     private void runTasks() {
-        for (WebView webView : tasks) {
+        for (WebView webView : webViews) {
             refresh(webView);
         }
+
+//        String discount = getBestDiscount();
+//        Toast.makeText(getBaseContext(), discount, Toast.LENGTH_SHORT).show();
     }
 
     public void refresh(WebView webView) {

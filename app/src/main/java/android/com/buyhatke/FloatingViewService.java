@@ -35,7 +35,7 @@ import static android.com.buyhatke.WebViewActivity.KEY;
  * Created by shobhit on 17/6/17.
  */
 
-public class FloatingViewService extends Service implements FetchDataListener, Listener {
+public class FloatingViewService extends Service implements FetchDataListener {
 
     private final String TAG = "FloatingViewService";
     private WindowManager mWindowManager;
@@ -272,7 +272,6 @@ public class FloatingViewService extends Service implements FetchDataListener, L
 
     @Override
     public void postExecute(String result) {
-        final Listener listener = this;
         Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
 
         String[] coupons = result.split("~");
@@ -287,6 +286,7 @@ public class FloatingViewService extends Service implements FetchDataListener, L
             final TextView priceView = (TextView) view.findViewById(R.id.price);
             final WebView webView = (WebView) view.findViewById(R.id.itemWebView);
 
+            priceView.setText("0");
             couponView.setText(coupon);
 
             UpdatePrice updatePriceListener = new UpdatePrice() {
@@ -313,7 +313,6 @@ public class FloatingViewService extends Service implements FetchDataListener, L
         }
     }
 
-    @Override
     public void refresh(WebView webView) {
         webView.loadUrl("http://m.jabong.com/cart/coupon/");
     }

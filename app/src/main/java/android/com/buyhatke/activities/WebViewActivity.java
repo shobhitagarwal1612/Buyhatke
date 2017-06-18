@@ -42,7 +42,6 @@ public class WebViewActivity extends AppCompatActivity {
     private EditText editText;
     private BroadcastReceiver receiver;
     private String coupon;
-    private boolean loading = false;
     private boolean couponApplied = false;
 
     @Override
@@ -80,6 +79,7 @@ public class WebViewActivity extends AppCompatActivity {
                 if (intent.hasExtra(SERVICE_MESSAGE)) {
                     coupon = intent.getStringExtra(SERVICE_MESSAGE);
 
+                    couponApplied = true;
                     webView.loadUrl("javascript:(function(){" +
                             "l=document.getElementById('applyCoupon');" +
                             "l.value='" + coupon + "';" +
@@ -110,9 +110,9 @@ public class WebViewActivity extends AppCompatActivity {
 
                 if (url.contains("cart")) {
 
-                    if (isServiceRunning(FloatingViewService.class)) {
-                        return;
-                    }
+//                    if (isServiceRunning(FloatingViewService.class)) {
+//                        return;
+//                    }
 
                     int value = 0;
                     if (url.contains(".jabong.")) {
@@ -136,18 +136,15 @@ public class WebViewActivity extends AppCompatActivity {
                 Log.d(TAG, "onPageFinished: " + url);
                 editText.setText(url);
 
-                if (url.contains("cart") && loading) {
+                if (url.contains("cart")) {
 
                     if (url.contains(".jabong.")) {
                         Log.d(TAG, "jabong cart");
 
                         if (!couponApplied) {
-                            if (url.contains("m.jabong.com/cart/coupon/")) {
-                                webView.loadUrl("http://m.jabong.com/cart/");
-                                couponApplied = true;
-                            } else {
-                                webView.loadUrl("http://m.jabong.com/cart/coupon/");
-                            }
+                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+                        } else if (url.contains("m.jabong.com/cart/coupon/")) {
+                            webView.loadUrl("http://m.jabong.com/cart/");
                         }
                     } else if (url.contains(".myntra.")) {
                         Log.d(TAG, "myntra cart");

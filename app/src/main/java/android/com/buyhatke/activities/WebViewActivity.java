@@ -110,9 +110,9 @@ public class WebViewActivity extends AppCompatActivity {
 
                 if (url.contains("cart")) {
 
-//                    if (isServiceRunning(FloatingViewService.class)) {
-//                        return;
-//                    }
+                    if (isServiceRunning(FloatingViewService.class)) {
+                        return;
+                    }
 
                     int value = 0;
                     if (url.contains(".jabong.")) {

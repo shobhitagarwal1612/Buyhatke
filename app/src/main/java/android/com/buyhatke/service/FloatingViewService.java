@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,15 +33,16 @@ import static android.com.buyhatke.activities.WebViewActivity.KEY;
 
 public class FloatingViewService extends Service implements FetchDataListener {
 
+    static final public String SERVICE_RESULT = "com.controlj.copame.backend.COPAService.REQUEST_PROCESSED";
+    static final public String SERVICE_MESSAGE = "com.controlj.copame.backend.COPAService.COPA_MSG";
     private final String TAG = "FloatingViewService";
     private WindowManager mWindowManager;
     private View mFloatingView;
-
     private LinearLayout expandedView;
     private String[] coupons;
-
     private ArrayList<ApplyCoupon> tasks = new ArrayList<>();
     private ArrayList<TextView> discountedPrices = new ArrayList<>();
+    private LocalBroadcastManager broadcaster;
 
     public FloatingViewService() {
     }
@@ -54,6 +56,8 @@ public class FloatingViewService extends Service implements FetchDataListener {
     public void onCreate() {
         super.onCreate();
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
+
+        broadcaster = LocalBroadcastManager.getInstance(this);
 
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -142,6 +146,13 @@ public class FloatingViewService extends Service implements FetchDataListener {
             getCoupons.setArgs(this);
             getCoupons.execute(value);
         }
+    }
+
+    public void sendResult(String message) {
+        Intent intent = new Intent(SERVICE_RESULT);
+        if (message != null)
+            intent.putExtra(SERVICE_MESSAGE, message);
+        broadcaster.sendBroadcast(intent);
     }
 
     private String getBestDiscount() {
@@ -237,6 +248,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
                 Toast.makeText(getBaseContext(), title + "\n\n" + message, Toast.LENGTH_LONG).show();
 
+                sendResult(disount);
                 //createDialog(title, message);
             }
         });

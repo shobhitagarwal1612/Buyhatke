@@ -3,12 +3,15 @@ package android.com.buyhatke.activities;
 import android.app.ActivityManager;
 import android.com.buyhatke.R;
 import android.com.buyhatke.service.FloatingViewService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +23,9 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import static android.com.buyhatke.service.FloatingViewService.SERVICE_MESSAGE;
+import static android.com.buyhatke.service.FloatingViewService.SERVICE_RESULT;
 
 /**
  * Created by shobhit on 16/6/17.
@@ -34,8 +40,10 @@ public class WebViewActivity extends AppCompatActivity {
     private static final String TAG = "WebViewActivity";
     SharedPreferences sharedPreferences;
     private WebView webView;
-    private ImageButton button;
     private EditText editText;
+    private BroadcastReceiver receiver;
+    private String coupon;
+    private boolean loading = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,7 +56,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         webView = (WebView) findViewById(R.id.webView);
         editText = (EditText) findViewById(R.id.editText);
-        button = (ImageButton) findViewById(R.id.button);
+        ImageButton button = (ImageButton) findViewById(R.id.button);
 
         editText.setText(url);
 
@@ -65,6 +73,25 @@ public class WebViewActivity extends AppCompatActivity {
         cookieManager.setAcceptCookie(true);
         cookieManager.acceptCookie();
         CookieSyncManager.getInstance().startSync();
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.hasExtra(SERVICE_MESSAGE)) {
+                    coupon = intent.getStringExtra(SERVICE_MESSAGE);
+
+                    loading = true;
+                    webView.loadUrl("javascript:(function(){" +
+                            "l=document.getElementById('applyCoupon');" +
+                            "l.value='" + coupon + "';" +
+                            "e=document.createEvent('HTMLEvents');" +
+                            "e.initEvent('click',true,true);" +
+                            "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
+                            "button.dispatchEvent(e);" +
+                            "})()");
+                }
+            }
+        };
 
         startWebView(url);
     }
@@ -117,6 +144,11 @@ public class WebViewActivity extends AppCompatActivity {
 
                         if (url.contains("m.jabong.com/cart/coupon/")) {
                             Log.d(TAG, "clicking jabong");
+
+                            if (loading) {
+                                webView.loadUrl("http://m.jabong.com/cart/");
+                                loading = false;
+                            }
                          /*   FloatingViewService.service.getWebView().loadUrl("javascript:(function(){" +
                                     "l=document.getElementById('applyCoupon');" +
                                     "l.value='INDIA10';" +
@@ -126,7 +158,7 @@ public class WebViewActivity extends AppCompatActivity {
                                     "button.dispatchEvent(e);" +
                                     "})()");*/
                         } else {
-//                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
 //                            FloatingViewService.service.getWebView().loadUrl("http://m.jabong.com/cart/coupon/");
                         }
 
@@ -185,5 +217,19 @@ public class WebViewActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
+                new IntentFilter(SERVICE_RESULT)
+        );
+    }
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onStop();
     }
 }

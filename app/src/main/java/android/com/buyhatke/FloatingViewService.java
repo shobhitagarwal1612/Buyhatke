@@ -27,21 +27,23 @@ import android.widget.Toast;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
+import java.util.ArrayList;
+
 import static android.com.buyhatke.WebViewActivity.KEY;
 
 /**
  * Created by shobhit on 17/6/17.
  */
 
-public class FloatingViewService extends Service implements FetchDataListener {
+public class FloatingViewService extends Service implements FetchDataListener, Listener {
 
     private final String TAG = "FloatingViewService";
     private WindowManager mWindowManager;
     private View mFloatingView;
-    private String[] coupons;
 
-    private int index = 0;
     private LinearLayout expandedView;
+    private boolean firstTime = true;
+    private ArrayList<WebView> tasks;
 
     public FloatingViewService() {
     }
@@ -145,7 +147,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
         }
     }
 
-    private void initWebView(final WebView webView, final TextView priceView) {
+    private void initWebView(final String coupon, final WebView webView, final UpdatePrice listener) {
 
         CookieManager cookieManager = CookieManager.getInstance();
         CookieSyncManager.createInstance(this);
@@ -167,7 +169,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
                 org.jsoup.nodes.Document doc = Jsoup.parse(html, "UTF-8");
 
                 Element content = doc.getElementsByClass("rupee").get(0);
-                priceView.setText(content.text());
+                listener.update(content.text());
             }
         }
 
@@ -181,14 +183,14 @@ public class FloatingViewService extends Service implements FetchDataListener {
                 return true;
             }
 
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                Log.d(TAG, "onLoadResource: " + url + " : " + coupon);
+                super.onLoadResource(view, url);
+            }
+
             public void onPageFinished(WebView view, String url) {
-                Log.d(TAG, "onPageFinished: " + url);
-
-                if (index >= coupons.length) {
-                    return;
-                }
-
-                String coupon = coupons[index];
+                Log.d(TAG, "onPageFinished: " + url + " : " + coupon);
 
                 if (url.contains("cart")) {
 
@@ -196,7 +198,6 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
                         if (url.contains("m.jabong.com/cart/coupon/")) {
                             Log.d(TAG, coupon);
-                            index++;
                             webView.loadUrl("javascript:(function(){" +
                                     "l=document.getElementById('applyCoupon');" +
                                     "l.value='" + coupon + "';" +
@@ -206,10 +207,8 @@ public class FloatingViewService extends Service implements FetchDataListener {
                                     "button.dispatchEvent(e);" +
                                     "})()");
                         } else {
-
                             /* This call inject JavaScript into the page which just finished loading. */
                             webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
-
                         }
                     } else if (url.contains(".myntra.")) {
 
@@ -273,27 +272,49 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
     @Override
     public void postExecute(String result) {
+        final Listener listener = this;
         Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
 
-        coupons = result.split("~");
+        String[] coupons = result.split("~");
+
+        tasks = new ArrayList<>();
 
         for (String coupon : coupons) {
 
             View view = View.inflate(getBaseContext(), R.layout.item_layout, null);
 
             TextView couponView = (TextView) view.findViewById(R.id.coupon);
-            TextView priceView = (TextView) view.findViewById(R.id.price);
-            WebView webView = (WebView) view.findViewById(R.id.itemWebView);
+            final TextView priceView = (TextView) view.findViewById(R.id.price);
+            final WebView webView = (WebView) view.findViewById(R.id.itemWebView);
 
             couponView.setText(coupon);
 
-            initWebView(webView, priceView);
+            UpdatePrice updatePriceListener = new UpdatePrice() {
+                @Override
+                public void update(String price) {
+                    priceView.setText(price);
+                }
+            };
+
+            initWebView(coupon, webView, updatePriceListener);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             expandedView.addView(view, params);
 
-            webView.loadUrl("http://m.jabong.com/cart/coupon/");
-
+            tasks.add(webView);
         }
+
+        runTasks();
+    }
+
+    private void runTasks() {
+        for (WebView webView : tasks) {
+            refresh(webView);
+        }
+    }
+
+    @Override
+    public void refresh(WebView webView) {
+        webView.loadUrl("http://m.jabong.com/cart/coupon/");
     }
 }

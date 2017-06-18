@@ -78,7 +78,7 @@ public class WebViewActivity extends AppCompatActivity {
             }
 
             public void onLoadResource(WebView view, String url) {
-                Log.d(TAG, "onLoadResource: " + url);
+                //Log.d(TAG, "onLoadResource: " + url);
 
                 if (url.contains("cart")) {
 

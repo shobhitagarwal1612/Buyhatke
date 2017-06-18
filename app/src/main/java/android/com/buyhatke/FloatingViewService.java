@@ -13,19 +13,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
 
 import java.util.ArrayList;
 
@@ -165,6 +157,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
         return coupons[index];
     }
 
+/*
     private void initWebView(final String coupon, final WebView webView, final UpdatePrice listener) {
 
         CookieManager cookieManager = CookieManager.getInstance();
@@ -175,7 +168,9 @@ public class FloatingViewService extends Service implements FetchDataListener {
         CookieSyncManager.getInstance().startSync();
 
 
-            /* An instance of this class will be registered as a JavaScript interface */
+            */
+/* An instance of this class will be registered as a JavaScript interface *//*
+
         class MyJavaScriptInterface {
             @JavascriptInterface
             @SuppressWarnings("unused")
@@ -229,7 +224,9 @@ public class FloatingViewService extends Service implements FetchDataListener {
                                     "button.dispatchEvent(e);" +
                                     "})()");
                         } else {
-                            /* This call inject JavaScript into the page which just finished loading. */
+                            */
+/* This call inject JavaScript into the page which just finished loading. *//*
+
                             webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
                         }
                     } else if (url.contains(".myntra.")) {
@@ -271,6 +268,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
         webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
         webView.setScrollbarFadingEnabled(false);
     }
+*/
 
     /**
      * Detect if the floating view is collapsed or expanded.
@@ -300,39 +298,47 @@ public class FloatingViewService extends Service implements FetchDataListener {
 
         for (String coupon : coupons) {
 
-            View view = View.inflate(getBaseContext(), R.layout.item_layout, null);
+            ApplyCoupon applyCoupon = new ApplyCoupon(getBaseContext(), coupon);
 
-            TextView couponView = (TextView) view.findViewById(R.id.coupon);
-            final TextView priceView = (TextView) view.findViewById(R.id.price);
-            final WebView webView = (WebView) view.findViewById(R.id.itemWebView);
+            View view = applyCoupon.initLayout();
 
 //            priceView.setText("");
-            couponView.setText(coupon);
+            discountedPrices.add(applyCoupon.getPriceView());
 
-            discountedPrices.add(priceView);
-
-            UpdatePrice updatePriceListener = new UpdatePrice() {
+            /*UpdatePrice updatePriceListener = new UpdatePrice() {
                 @Override
                 public void update(String price) {
                     priceView.setText(price);
                 }
-            };
+            };*/
 
-            initWebView(coupon, webView, updatePriceListener);
+            applyCoupon.initWebView();
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             expandedView.addView(view, params);
 
-            refresh(webView);
-            //webViews.add(webView);
+            applyCoupon.runTask();
+//            webViews.add(webView);
+//            refresh(webView);
         }
 
-        //runTasks();
+//        runTasks();
     }
 
     private void runTasks() {
-        for (WebView webView : webViews) {
-            refresh(webView);
+        Log.d(TAG, "checking if any coupon is left to be applied");
+        for (int i = 0; i < discountedPrices.size(); i++) {
+            TextView discountedPrice = discountedPrices.get(i);
+            if (discountedPrice.getText().toString().trim().equals("")) {
+                webViews.get(i).loadUrl("javascript:(function(){" +
+                        "l=document.getElementById('applyCoupon');" +
+                        "l.value='" + coupons[i] + "';" +
+                        "e=document.createEvent('HTMLEvents');" +
+                        "e.initEvent('click',true,true);" +
+                        "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
+                        "button.dispatchEvent(e);" +
+                        "})()");
+            }
         }
 
 //        String discount = getBestDiscount();

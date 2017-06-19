@@ -12,6 +12,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.jsoup.Jsoup;
@@ -20,6 +21,7 @@ import org.jsoup.nodes.Element;
 import static android.com.buyhatke.activities.WebViewActivity.KEY;
 import static android.com.buyhatke.activities.WebViewActivity.KEY_JABONG;
 import static android.com.buyhatke.activities.WebViewActivity.KEY_MYNTRA;
+import static android.view.View.GONE;
 
 /**
  * Created by shobhit on 18/6/17.
@@ -35,6 +37,7 @@ public class ApplyCoupon implements UpdatePrice {
     private WebView webView;
     private UpdatePrice listener;
     private boolean clicked = false;
+    private ProgressBar progressBar;
 
     public ApplyCoupon(Context context, String coupon) {
         this.context = context;
@@ -60,7 +63,8 @@ public class ApplyCoupon implements UpdatePrice {
 
     @Override
     public void update(String price) {
-        priceView.setText(price);
+        progressBar.setVisibility(GONE);
+        priceView.setText("Rs. " + price);
     }
 
     public void initWebView() {

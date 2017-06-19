@@ -193,7 +193,13 @@ public class FloatingViewService extends Service implements FetchDataListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mFloatingView != null) mWindowManager.removeView(mFloatingView);
+        try {
+            if (mFloatingView != null) {
+                mWindowManager.removeView(mFloatingView);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -216,6 +222,7 @@ public class FloatingViewService extends Service implements FetchDataListener {
             discountedPrices.add(applyCoupon.getPriceView());
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(5, 5, 5, 5);
             expandedView.addView(view, params);
 
             tasks.add(applyCoupon);

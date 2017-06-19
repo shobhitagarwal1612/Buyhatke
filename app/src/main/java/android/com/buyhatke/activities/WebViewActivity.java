@@ -79,15 +79,32 @@ public class WebViewActivity extends AppCompatActivity {
                 if (intent.hasExtra(SERVICE_MESSAGE)) {
                     coupon = intent.getStringExtra(SERVICE_MESSAGE);
 
-                    couponApplied = true;
-                    webView.loadUrl("javascript:(function(){" +
-                            "l=document.getElementById('applyCoupon');" +
-                            "l.value='" + coupon + "';" +
-                            "e=document.createEvent('HTMLEvents');" +
-                            "e.initEvent('click',true,true);" +
-                            "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
-                            "button.dispatchEvent(e);" +
-                            "})()");
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    int value = sharedPreferences.getInt(KEY, 0);
+
+                    if (value != 0) {
+                        couponApplied = true;
+
+                        if (value == KEY_JABONG) {
+                            webView.loadUrl("javascript:(function(){" +
+                                    "l=document.getElementById('applyCoupon');" +
+                                    "l.value='" + coupon + "';" +
+                                    "e=document.createEvent('HTMLEvents');" +
+                                    "e.initEvent('click',true,true);" +
+                                    "button=document.getElementsByClassName('jbApplyCoupon')[0];" +
+                                    "button.dispatchEvent(e);" +
+                                    "})()");
+                        } else if (value == KEY_MYNTRA) {
+                            webView.loadUrl("javascript:(function(){" +
+                                    "l=document.getElementsByName('coupon_code')[0];" +
+                                    "l.value='" + coupon + "';" +
+                                    "e=document.createEvent('HTMLEvents');" +
+                                    "e.initEvent('click',true,true);" +
+                                    "button=document.getElementsByClassName('btn-apply')[0];" +
+                                    "button.dispatchEvent(e);" +
+                                    "})()");
+                        }
+                    }
                 }
             }
         };
@@ -149,14 +166,20 @@ public class WebViewActivity extends AppCompatActivity {
                     } else if (url.contains(".myntra.")) {
                         Log.d(TAG, "myntra cart");
 
-                        webView.loadUrl("javascript:(function(){" +
+                        /*if (couponApplied) {
+                            webView.loadUrl("http://m.jabong.com/cart/coupon/");
+                        } else if (url.contains("m.jabong.com/cart/coupon/")) {
+                            webView.loadUrl("http://m.jabong.com/cart/");
+                        }*/
+
+                        /*webView.loadUrl("javascript:(function(){" +
                                 "l=document.getElementsByName('coupon_code')[0];" +
                                 "l.value='INDIA10';" +
                                 "e=document.createEvent('HTMLEvents');" +
                                 "e.initEvent('click',true,true);" +
                                 "button=document.getElementsByClassName('btn-apply')[0];" +
                                 "button.dispatchEvent(e);" +
-                                "})()");
+                                "})()");*/
                     }
                 }
 

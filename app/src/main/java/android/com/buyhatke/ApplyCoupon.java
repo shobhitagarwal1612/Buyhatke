@@ -2,6 +2,8 @@ package android.com.buyhatke;
 
 import android.com.buyhatke.interfaces.UpdatePrice;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -14,6 +16,10 @@ import android.widget.TextView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+
+import static android.com.buyhatke.activities.WebViewActivity.KEY;
+import static android.com.buyhatke.activities.WebViewActivity.KEY_JABONG;
+import static android.com.buyhatke.activities.WebViewActivity.KEY_MYNTRA;
 
 /**
  * Created by shobhit on 18/6/17.
@@ -28,6 +34,7 @@ public class ApplyCoupon implements UpdatePrice {
     private TextView priceView;
     private WebView webView;
     private UpdatePrice listener;
+    private boolean clicked = false;
 
     public ApplyCoupon(Context context, String coupon) {
         this.context = context;
@@ -103,14 +110,19 @@ public class ApplyCoupon implements UpdatePrice {
                     } else if (url.contains(".myntra.")) {
 
                         Log.d(TAG, "clicking myntra");
-                        webView.loadUrl("javascript:(function(){" +
-                                "l=document.getElementsByName('coupon_code')[0];" +
-                                "l.value='INDIA10';" +
-                                "e=document.createEvent('HTMLEvents');" +
-                                "e.initEvent('click',true,true);" +
-                                "button=document.getElementsByClassName('btn-apply')[0];" +
-                                "button.dispatchEvent(e);" +
-                                "})()");
+                        if (!clicked) {
+                            webView.loadUrl("javascript:(function(){" +
+                                    "l=document.getElementsByName('coupon_code')[0];" +
+                                    "l.value='" + coupon + "';" +
+                                    "e=document.createEvent('HTMLEvents');" +
+                                    "e.initEvent('click',true,true);" +
+                                    "button=document.getElementsByClassName('btn-apply')[0];" +
+                                    "button.dispatchEvent(e);" +
+                                    "})()");
+                            clicked = true;
+                        } else {
+                            webView.loadUrl("javascript:HTMLOUT.processHTML(document.documentElement.outerHTML);");
+                        }
                     }
                 }
             }
@@ -136,7 +148,16 @@ public class ApplyCoupon implements UpdatePrice {
     }
 
     public void runTask() {
-        webView.loadUrl("http://m.jabong.com/cart/coupon/");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int value = sharedPreferences.getInt(KEY, 0);
+
+        if (value != 0) {
+            if (value == KEY_JABONG) {
+                webView.loadUrl("http://m.jabong.com/cart/coupon/");
+            } else if (value == KEY_MYNTRA) {
+                webView.loadUrl("https://secure.myntra.com/checkout/cart/");
+            }
+        }
     }
 
 

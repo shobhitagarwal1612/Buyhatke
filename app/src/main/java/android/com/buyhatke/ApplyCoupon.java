@@ -155,7 +155,7 @@ public class ApplyCoupon implements UpdatePrice {
             if (value == KEY_JABONG) {
                 webView.loadUrl("http://m.jabong.com/cart/coupon/");
             } else if (value == KEY_MYNTRA) {
-                webView.loadUrl("https://secure.myntra.com/checkout/cart/");
+                webView.loadUrl("http://secure.myntra.com/checkout/cart/");
             }
         }
     }

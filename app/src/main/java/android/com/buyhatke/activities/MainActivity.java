@@ -10,10 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     private EditText editText;
+    private boolean hasChecked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +41,19 @@ public class MainActivity extends AppCompatActivity {
         //you have to ask for the permission in runtime.
         if (hasDrawOverLayPermission()) {
 
-            //If the draw over permission is not available open the settings screen
-            //to grant the permission.
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
+            if (hasChecked) {
+                Toast.makeText(this, "Application can't work without the permission.\nCLosing the application", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+
+                Toast.makeText(this, "Please enable this permission", Toast.LENGTH_SHORT).show();
+
+                //If the draw over permission is not available open the settings screen
+                //to grant the permission.
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
+            }
         } else {
             runViaWebView();
         }
@@ -60,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CODE_DRAW_OVER_OTHER_APP_PERMISSION) {
+            hasChecked = true;
             openActivity();
         }
     }

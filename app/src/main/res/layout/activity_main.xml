@@ -15,7 +15,7 @@
         android:ems="10"
         android:hint="Enter your website"
         android:inputType="textPersonName"
-        android:text="https://www.myntra.com" />
+        android:text="https://www.jabong.com" />
 
     <Button
         android:id="@+id/button"
